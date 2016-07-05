@@ -1,0 +1,59 @@
+
+uname := $(subst -, , $(shell uname -n))
+uname := $(word  1, ${uname})
+uname := $(strip ${uname})
+uname := $(subst ., , ${uname})
+uname := $(word  1, ${uname})
+uname := $(strip ${uname})
+MACHNAME := ${uname}
+
+pairs :=
+pairs += jvn-[ln][0-9]*:jvn
+pairs += l[0-9]*:mjm
+pairs += pingo[1-9]:pingo
+pairs += nid[0-9]*:einstein
+pairs += d[0-9][0-9]n[0-9][0-9]:davinci
+pairs += d[0-9][0-9]n[0-9]:davinci
+pairs += hpc11-[0-9]*:eagle eagle-[0-9]*:eagle falcon-[0-9]*:falcon
+pairs += hawk-[0-9]*:hawk
+pairs += k[1-9][0-9]*n[1-9][0-9]*e*:kraken
+pairs += b[1-9]*n[0-9]:babbage
+pairs += tow-l[0-9]:tow
+pairs += [a-d]login[1-2]*:tbird
+pairs += login[1-9]:surveyor
+mapname := $(shell for pair in ${pairs}; \
+             do pat=`echo $$pair | sed 's/:.*//'`; \
+                name=`echo $$pair | sed 's/.*://'`; \
+                echo ${MACHNAME} | sed -n "/^ *$$pat *$$/{s/.*/$$name/;p;}"; \
+             done)
+ifdef mapname
+   MACHNAME := ${mapname}
+endif
+
+ifeq ($(MACHNAME),emperor)
+FFLAGS=-D__fortran -D__fortran77 -fPIC -DMPIF2C -DMPI2 -malign-double -ffast-math -mtune=native -mfpmath=sse -msse3 -Wall -lmpi_f90 -lmpi -O2
+CFLAGS=-DMPIF2C -DMPI2 -DC_SUFFIX -DCB_SUFFIX -DMPI2 -DINTEL -O2 -fPIC
+CPPFLAGS=-DMPIF2C -DC_SUFFIX -DCB_SUFFIX -DMPI2 -Wall -O2 -fPIC
+FC=mpif90
+CC=mpicc
+CPP=mpicxx
+SERIAL_CPP=g++
+LIB_DIRS=-L/usr/lib
+LIBS=-lmpi_cxx -lsip1 -lsip2 -lsip_shared -lframelib -laces2 -lgeopt -lsymcor -laces2 -lerd -loed -ldup -lsip1 -lsip2 -lblas -llapack -lstdc++
+SIAL_COMPILER_LIBS=-lsial -lsip_shared -laces2 -lgfortranbegin -lgfortran -ldl -lsip1 -lsip2
+else
+FFLAGS=-D__fortran -D__fortran77 -DMPIF2C -Zp8 -zero -traceback -O2 
+CFLAGS=-DMPIF2C -DC_SUFFIX  -DCB_SUFFIX 
+CPPFLAGS=-DMPIF2C -DC_SUFFIX -DCB_SUFFIX 
+#CFLAGS=-DMPIF2C -DC_SUFFIX -DCB_SUFFIX  -cxxlib-icc
+#CPPFLAGS=-DMPIF2C -DC_SUFFIX -DCB_SUFFIX -cxxlib-icc
+FC=mpif77
+CC=mpicc
+CPP=mpicxx
+SERIAL_CPP=icpc
+INCLUDE_DIRS=-I$$MPIHOME/include 
+LIB_DIRS=-L/opt/intel/mkl/11.1.064/lib/em64t/ -L/opt/intel/fce/10.1.015/lib -lmkl_intel_lp64 -lmkl_sequential -lmkl_core  -lmkl_def -lmkl_p4n -lmkl_mc
+SIAL_COMPILER_LIBS=-lsial -lsip_shared -laces2  -lifcore
+LIBS=-lsip1 -lsip2 -lsip_shared -lframelib -laces2 -lgeopt -lsymcor -laces2 -lerd -loed -ldup -lsip1 -lsip2 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lmkl_lapack -lstdc++
+endif 
+

@@ -1,0 +1,112 @@
+
+execute server_barrier
+esum = 0.0
+pardo b,b1,b2,j
+    request HBAR_ABCI_bbbb(b,b1,b2,j) j
+    Tbbbj(b,b1,b2,j) = HBAR_ABCI_bbbb(b,b1,b2,j)
+    etemp = Tbbbj(b,b1,b2,j)*HBAR_ABCI_bbbb(b,b1,b2,j)
+    esum += etemp
+endpardo b,b1,b2,j
+execute server_barrier
+sum1 = 0.0
+collective sum1 += esum
+execute print_scalar sum1
+execute server_barrier
+
+execute server_barrier
+esum = 0.0
+pardo a,a1,a2,i
+    request HBAR_ABCI_aaaa(a,a1,a2,i) i
+    Taaai(a,a1,a2,i) = HBAR_ABCI_aaaa(a,a1,a2,i)
+    etemp = Taaai(a,a1,a2,i)*HBAR_ABCI_aaaa(a,a1,a2,i)
+    esum += etemp
+endpardo a,a1,a2,i
+execute server_barrier
+sum1 = 0.0
+collective sum1 += esum
+execute print_scalar sum1
+execute server_barrier
+
+execute server_barrier
+esum = 0.0
+pardo a,a1,b2,j
+    request HBAR_ABCI_aabb(a,a1,b2,j) j
+    Taabj(a,a1,b2,j) = HBAR_ABCI_aabb(a,a1,b2,j)
+    etemp = Taabj(a,a1,b2,j)*HBAR_ABCI_aabb(a,a1,b2,j)
+    esum += etemp
+endpardo a,a1,b2,j
+execute server_barrier
+sum1 = 0.0
+collective sum1 += esum
+execute print_scalar sum1
+execute server_barrier
+
+execute server_barrier
+esum = 0.0
+pardo b,b1,a2,i
+    request HBAR_ABCI_bbaa(b,b1,a2,i) i
+    Tbbai(b,b1,a2,i) = HBAR_ABCI_bbaa(b,b1,a2,i)
+    etemp = Tbbai(b,b1,a2,i)*HBAR_ABCI_bbaa(b,b1,a2,i)
+    esum += etemp
+endpardo b,b1,a2,i
+execute server_barrier
+sum1 = 0.0
+collective sum1 += esum
+execute print_scalar sum1
+execute server_barrier
+
+execute server_barrier
+esum = 0.0
+pardo i,a,i1,i2
+    request HBAR_IAJK_aaaa(i,i1,a,i2) i
+    Tpppp(i,i1,a,i2) = HBAR_IAJK_aaaa(i,i1,a,i2)
+    etemp = Tpppp(i,i1,a,i2)*HBAR_IAJK_aaaa(i,i1,a,i2)
+    esum += etemp
+endpardo i,a,i1,i2
+execute server_barrier
+sum1 = 0.0
+collective sum1 += esum
+execute print_scalar sum1
+execute server_barrier
+
+execute server_barrier
+esum = 0.0
+pardo j,b,j1,j2
+    request HBAR_IAJK_bbbb(j,j1,b,j2) j
+    Tqqqq(j,j1,b,j2) = HBAR_IAJK_bbbb(j,j1,b,j2)
+    etemp = Tqqqq(j,j1,b,j2)*HBAR_IAJK_bbbb(j,j1,b,j2)
+    esum += etemp
+endpardo j,b,j1,j2
+execute server_barrier
+sum1 = 0.0
+collective sum1 += esum
+execute print_scalar sum1
+execute server_barrier
+
+execute server_barrier
+esum = 0.0
+pardo i,a,a1,i1
+    request WHIAAI(i,a,a1,i1) i
+    Tpppp(i,a,a1,i1) = WHIAAI(i,a,a1,i1)
+    etemp = Tpppp(i,a,a1,i1)*WHIAAI(i,a,a1,i1)
+    esum += etemp
+endpardo i,a,a1,i1
+execute server_barrier
+sum1 = 0.0
+collective sum1 += esum
+execute print_scalar sum1
+execute server_barrier
+
+execute server_barrier
+esum = 0.0
+pardo j,b,b1,j1
+    request WHJBBJ(j,b,b1,j1) j
+    Tqqqq(j,b,b1,j1) = WHJBBJ(j,b,b1,j1)
+    etemp = Tqqqq(j,b,b1,j1)*WHJBBJ(j,b,b1,j1)
+    esum += etemp
+endpardo j,b,b1,j1
+execute server_barrier
+sum1 = 0.0
+collective sum1 += esum
+execute print_scalar sum1
+execute server_barrier
