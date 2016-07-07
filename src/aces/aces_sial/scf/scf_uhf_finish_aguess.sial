@@ -103,6 +103,8 @@
       distributed IDhfb(mu,nu) 
       distributed Dhfa_old(mu,nu) 
       distributed Dhfb_old(mu,nu) 
+      distributed Dhfa_stable(mu,nu) 
+      distributed Dhfb_stable(mu,nu) 
 #
       distributed Fpq_a(mu,nu) 
       distributed Fpq_b(mu,nu) 
@@ -199,6 +201,7 @@
 # Scalars used in DIIS procedure 
 # ------------------------------ 
        scalar dens_check 
+       scalar reset 
 #
        scalar b11
        scalar b12
@@ -412,8 +415,12 @@
       scalar two
       scalar three
       scalar four
+      scalar five  
+      scalar ten  
       scalar pcount 
+      scalar kcount 
       scalar ncount1 
+      scalar dcount 
       scalar rank 
 #
 # Parameters needed for DIIS 
@@ -423,6 +430,7 @@
       scalar diis_order   
       scalar diis_max_order # same as kdiis   
       scalar diis_count 
+      scalar diis_restart  
       scalar worder  
       scalar n1 
       scalar n2 
@@ -1390,6 +1398,26 @@
 #      The HF energy is computed from the HF density (DHFa(b)) and the 
 #      Fock matrix (Fpq_a(b)). 
 #      --------------------------------------------------------------- 
+      esum = 0.0 
+      DO mu 
+      DO nu 
+            GET Dhfa(mu,nu)  
+            etemp = DHFa(mu,nu)*DHFa(mu,nu) 
+            esum += etemp 
+      ENDDO nu 
+      ENDDO mu  
+      execute print_scalar esum 
+
+      esum = 0.0 
+      DO mu 
+      DO nu 
+            GET Dhfb(mu,nu)  
+            etemp = DHFb(mu,nu)*DHFb(mu,nu) 
+            esum += etemp 
+      ENDDO nu 
+      ENDDO mu  
+      execute print_scalar esum 
+      execute sip_barrier 
 #
        energy = 0.0
        esum = 0.0 
@@ -1442,7 +1470,16 @@
 #      root of the diagonal elements. 
 #      -------------------------------------------------------------- 
 #
-       execute eig_sr_inv oed_ovl x1   
+       execute get_my_rank rank 
+       if rank == 0.0 
+          execute eig_sr_inv oed_ovl x1   
+       endif 
+       execute sip_barrier
+       execute broadcast_array x1
+       execute print_scalar rank
+       execute broadcast_array oed_ovl
+       execute print_scalar rank
+       execute sip_barrier
 #
 #      Form the Q-matrix --> U s**{-1/2) 
 #      --------------------------------- 
@@ -1516,20 +1553,32 @@
 #      First put the transposed Fock arrays into static arrays 
 #      ------------------------------------------------------- 
 #
-       DO mu   
-       DO nu  
+       execute get_my_rank rank
+       execute print_scalar rank
+       if rank == 0.0
 #
-          GET             FTpq_a(mu,nu) 
-          GET             FTpq_b(mu,nu)
+        DO mu   
+        DO nu  
 #
-          FSpq_a(mu,nu) = FTpq_a(mu,nu)
-          FSpq_b(mu,nu) = FTpq_b(mu,nu)
+           GET             FTpq_a(mu,nu) 
+           GET             FTpq_b(mu,nu)
 #
-       ENDDO nu  
-       ENDDO mu   
+           FSpq_a(mu,nu) = FTpq_a(mu,nu)
+           FSpq_b(mu,nu) = FTpq_b(mu,nu)
 #
-       execute eig FSpq_a ca
-       execute eig FSpq_b Cb  
+        ENDDO nu  
+        ENDDO mu   
+#
+        execute eig FSpq_a ca
+        execute eig FSpq_b Cb  
+
+       endif 
+       execute sip_barrier
+       execute print_scalar rank
+       execute broadcast_array ca
+       execute print_scalar rank
+       execute broadcast_array cb
+       execute print_scalar rank
 #
        ENDPROC FOCK_DIAG 
 #      ----------------- 
@@ -1661,6 +1710,8 @@
              GET DHFb(mu,nu) 
              PUT DHFa_old(mu,nu) = DHFa(mu,nu)  
              PUT DHFb_old(mu,nu) = DHFb(mu,nu)  
+             PUT DHFa_stable(mu,nu) = DHFa(mu,nu)  
+             PUT DHFb_stable(mu,nu) = DHFa(mu,nu)  
 #
        ENDPARDO mu, nu 
 #
@@ -2050,6 +2101,50 @@
 #
        ENDPROC MOVE6    
 #      -------------  
+#
+# ---------------------------------------------------------------------------- 
+#
+       PROC ZERO6    
+#      ----------  
+#
+#      Move histories 
+#      -------------- 
+#
+       PARDO mu, nu 
+          DO d1 
+             tpqx(mu,nu,d1)    = 0.0  
+             PUT  Fa(mu,nu,d1) = tpqx(mu,nu,d1)  
+          ENDDO d1 
+       ENDPARDO mu, nu 
+#
+       PARDO a, i 
+          DO d1 
+             taix(a,i,d1)  = 0.0  
+             PUT  Fai(a,i,d1) = taix(a,i,d1)  
+          ENDDO d1 
+       ENDPARDO a,i  
+#
+       PARDO mu, nu 
+          DO d1 
+             tpqx(mu,nu,d1)    = 0.0  
+             PUT  Fb(mu,nu,d1) = tpqx(mu,nu,d1)  
+          ENDDO d1 
+       ENDPARDO mu, nu 
+#
+       PARDO b, j 
+          DO d1 
+             tbjx(b,j,d1)  = 0.0  
+             PUT  Fbj(b,j,d1) = tbjx(b,j,d1)  
+          ENDDO d1 
+       ENDPARDO b,j  
+#
+       execute sip_barrier 
+#
+       ENDPROC ZERO6    
+#      -------------  
+#
+# ---------------------------------------------------------------------------- 
+#
 #
 # ---------------------------------------------------------------------------- 
 #
@@ -3095,12 +3190,16 @@
       two = 2.0 
       three = 3.0 
       four = 4.0 
+      five = 5.0 
+      ten = 10.0 
       pcount = 0.0 
+      kcount = 0.0 
       diis_count = 0.0  
       diis_start = 2.0 
       diis_end = 150.0 
       diis_order = 8.0 
       diis_max_order = 10.0 
+      diis_restart = 4.0 
 
       diis_start = 0.0
       do kbeg
@@ -3139,6 +3238,8 @@
 #
       CREATE DHFa_old    
       CREATE DHFb_old    
+      CREATE DHFa_stable     
+      CREATE DHFb_stable     
 #
 #     DIIS vectors 
 #     ------------ 
@@ -3159,23 +3260,6 @@
       CREATE IDhfb 
       execute sip_barrier 
 #
-#     Perform initial (aa|bb) integral computation to set Schwartz paramaters 
-#     ----------------------------------------------------------------------- 
-#
-      DO mu
-      DO nu
-      DO lambda
-      DO sigma
-            IF mu == lambda
-            IF nu == sigma
-               execute compute_aabb_batch aoint(mu,nu,lambda,sigma)
-            ENDIF
-            ENDIF
-      ENDDO sigma
-      ENDDO lambda
-      ENDDO nu
-      ENDDO mu 
-#
 #     Construct the initial guess of the Fock matrix.
 #     -----------------------------------------------
 #    
@@ -3195,7 +3279,49 @@
             PUT Dhfa(mu,nu) = txx(mu,nu)
             PUT Dhfb(mu,nu) = txx(mu,nu)
       ENDPARDO mu, nu 
+
       execute sip_barrier
+     #esum = 0.0 
+     #DO mu 
+     #DO nu 
+     #      GET Dhfa(mu,nu)  
+     #      etemp = DHFa(mu,nu)*DHFa(mu,nu) 
+     #     #esum += etemp 
+     #     #execute dump_amp dhfa 
+     #ENDDO nu 
+     #ENDDO mu  
+     #execute print_scalar esum 
+
+     #esum = 0.0 
+     #DO mu 
+     #DO nu 
+     #      GET Dhfb(mu,nu)  
+     #      etemp = DHFb(mu,nu)*DHFb(mu,nu) 
+     #     #esum += etemp 
+     #     #execute dump_amp dhfb 
+     #ENDDO nu 
+     #ENDDO mu  
+     #execute print_scalar esum 
+     #execute sip_barrier 
+#
+
+#
+#     Perform initial (aa|bb) integral computation to set Schwartz paramaters 
+#     ----------------------------------------------------------------------- 
+#
+      DO mu
+      DO nu
+      DO lambda
+      DO sigma
+            IF mu == lambda
+            IF nu == sigma
+               execute compute_aabb_batch aoint(mu,nu,lambda,sigma)
+            ENDIF
+            ENDIF
+      ENDDO sigma
+      ENDDO lambda
+      ENDDO nu
+      ENDDO mu 
 #
 # Check for an existing density 
 # ----------------------------- 
@@ -3212,37 +3338,42 @@
       ENDDO mu
       DO mu 
       DO p 
-         ca(mu,p) = 0.0 
+         txp(mu,p) = 0.0 
+         ca(mu,p) = txp(mu,p)  
       ENDDO p 
       ENDDO mu 
       DO mu 
       DO q 
-         cb(mu,q) = 0.0 
+         txq(mu,q) = 0.0 
+         cb(mu,q) = txq(mu,q)  
       ENDDO q 
       ENDDO mu 
 
       dens_check = -1.0
       execute scf_atom dens_check 
       execute print_scalar dens_check 
+
       if dens_check == 1.0
+
          execute get_my_rank rank 
          if rank == 0.0 
 
-         DO mu
-         DO nu
-            txx(mu,nu)      = Fockrohf_a(mu,nu)
-            PUT Dhfa(mu,nu) = txx(mu,nu)
-            txx(mu,nu)      = Fockrohf_b(mu,nu)
-            PUT Dhfb(mu,nu) = txx(mu,nu)
-         ENDDO nu
-         ENDDO mu
+            DO mu
+            DO nu
+               txx(mu,nu)      = Fockrohf_a(mu,nu)
+               PUT Dhfa(mu,nu) = txx(mu,nu)
+               txx(mu,nu)      = Fockrohf_b(mu,nu)
+               PUT Dhfb(mu,nu) = txx(mu,nu)
+            ENDDO nu
+            ENDDO mu
 
-         endif 
+         endif
 
          damp = 0.0 
          damp1 = 1.0 
 
-      endif
+      endif 
+
       execute load_balance_on 
       execute sip_barrier
 
@@ -3339,9 +3470,11 @@
 # Start iterations 
 # ---------------- 
 #
+      dcount = 0.0 
       DO kiter 
          diis_count += 1.0 
          pcount     += 1.0 
+         kcount     += 1.0 
 #
 #        Create 1-particle arrays 
 #        ------------------------ 
@@ -3378,7 +3511,91 @@
 #
          CALL HF_ENERGY 
          energy2 = energy 
+#
+#        Reset eold --> enen and check if the energy is rising 
+#        -----------------------------------------------------
+#
          execute sip_barrier
+         reset = 1.0 
+         etemp = energy2 
+         etemp-= energy1 
+
+         if kcount > five 
+         if etemp > 0.000001
+         if etemp < 0.1
+         if done > 0.001 
+        #if energy2 > energy1 
+            diis_count  = 0.0 
+            diis_restart += 1.0    
+            diis_start = diis_restart  
+            kcount = 0.0 
+            done = 1.0 
+            execute print_scalar etemp  
+            execute print_scalar energy1   
+            execute print_scalar energy2   
+            execute print_scalar diis_start 
+#
+         delete Fpq_a 
+         delete Fpq_b 
+         delete CBT_a 
+         delete CBT_b 
+         delete FTpq_a  
+         delete FTpq_b  
+         execute sip_barrier
+#
+         CREATE Fpq_a 
+         CREATE Fpq_b 
+         CREATE CBT_a 
+         CREATE CBT_b 
+         CREATE FTpq_a  
+         CREATE FTpq_b  
+         execute sip_barrier
+#
+           #damp   = 0.2 
+           #etemp  = 1.0 
+           #etemp += damp  
+           #damp1  = 1.0/etemp         # 1/(1+damp)  
+            reset = 0.0 
+            PARDO mu, nu 
+                 #GET                   DHFa_stable(mu,nu) 
+                 #GET                   DHFb_stable(mu,nu) 
+                  GET                   DHFa_old(mu,nu) 
+                  GET                   DHFb_old(mu,nu) 
+                  PUT DHFa(mu,nu)     = DHFa_old(mu,nu)  
+                  PUT DHFb(mu,nu)     = DHFb_old(mu,nu)  
+                 #PUT DHFa_old(mu,nu) = DHFa_stable(mu,nu)  
+                 #PUT DHFb_old(mu,nu) = DHFb_stable(mu,nu)  
+            ENDPARDO mu, nu 
+            CALL ZERO6 
+
+            DO mu
+            DO nu
+               GET              DHFa(mu,nu)
+               GET              DHFb(mu,nu)
+               oed_ovl(mu,nu) = DHFa(mu,nu) # 13
+               oed_kin(mu,nu) = DHFb(mu,nu) # 12
+            ENDDO nu
+            ENDDO mu
+
+            DO iiter1
+            DO jjter2
+                execute set_flags2 dflags12(iiter1,jjter2)
+            ENDDO jjter2
+            ENDDO iiter1
+
+            execute sip_barrier 
+            CALL FOCK_MATRIX_FAST   
+            execute sip_barrier 
+#
+            CALL HF_ENERGY 
+            energy2 = energy 
+         endif 
+         endif 
+         endif 
+         endif 
+         execute sip_barrier 
+
+         energy1 = energy2  
 #
 #        Compute the DIIS  
 #        ------------------ 
@@ -3521,31 +3738,33 @@
 #        Check on convergence using density difference. 
 #        ---------------------------------------------- 
 #
-         IF kiter > 1 
+         IF kcount > one  
             IF done < scf_conv 
+           #   dcount += 1.0 
+           #IF dcount > three 
                DELETE FTpq_a  
                DELETE FTpq_b  
                DELETE CBT_a 
                DELETE CBT_b 
                exit 
+           #ENDIF 
             ENDIF 
          ENDIF 
+         execute sip_barrier
 #
 #        Replace 'old' HF density by 'new' HF density 
 #        -------------------------------------------- 
 #
-         CALL HFDENS_REPLACE 
-         execute sip_barrier
-#
-#        Reset eold --> enew
-#        -------------------
-#
-         energy1 = energy2  
+        #if reset == 1.0   
+            CALL HFDENS_REPLACE 
+            execute sip_barrier
 #
 #        Compute the HF density 
 #        ---------------------- 
 #
-         CALL HFDENS
+            CALL HFDENS
+        #endif 
+
          execute sip_barrier
 #
 #        Delete one-particle arrays to be used in the next iteration. 
@@ -3664,9 +3883,12 @@
 #
       endif
 #
-#
       scfeneg  = energy2 
       totenerg = scfeneg
+      execute sip_barrier
+#
+#dont update until after scheck       scfeneg  = energy2 
+#                                     totenerg = scfeneg
       execute sip_barrier
 #
                            ENDSIAL SCF_UHF_DIIS         
