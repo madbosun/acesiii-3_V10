@@ -123,7 +123,7 @@ c--------------------------------------------------------------------------|
 
 c--------------------------------------------------------------------------|
 c             Dropmo data                                |
-      write(6,*) ' MODROPA in SEND:', ndropmo_a, ndropmo_b
+C      write(6,*) ' MODROPA in SEND:', ndropmo_a, ndropmo_b
       call mpi_bcast(ndropmo_a,1,mpi_integer,0,mpi_comm_world, ierr)
       call mpi_bcast(ndropmo_b,1,mpi_integer,0,mpi_comm_world, ierr)
 c--------------------------------------------------------------------------|
