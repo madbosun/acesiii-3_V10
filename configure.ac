@@ -119,6 +119,5 @@ AC_CONFIG_FILES([src/sia/sip/aces_instructions/Makefile])
 AC_CONFIG_FILES([src/sia/sip/sip_instructions/Makefile])
 AC_CONFIG_FILES([src/sia/worker/Makefile])
 AC_CONFIG_FILES([src/sia/sip_shared/Makefile])
-AC_CONFIG_FILES([test_compare/Makefile])
 
 AC_OUTPUT

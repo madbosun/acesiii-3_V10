@@ -4088,8 +4088,6 @@ ac_config_files="$ac_config_files src/sia/worker/Makefile"
 
 ac_config_files="$ac_config_files src/sia/sip_shared/Makefile"
 
-ac_config_files="$ac_config_files test_compare/Makefile"
-
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure

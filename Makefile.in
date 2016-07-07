@@ -26,7 +26,7 @@ LIB_DIRS= @ACESFLAGS@
 SIAL_COMPILER_LIBS= @SIAL_COMPILER_LIBS@
 
 
-FILES:= src src/aces/aces_sial test_compare tests
+FILES:= src src/aces/aces_sial 
 TARGET_DIRS:=$(shell for dir in $(FILES); \
                      do test -f $$dir/Makefile && echo $$dir; \
                      done)
