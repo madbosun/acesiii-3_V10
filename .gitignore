@@ -2,7 +2,6 @@
 *.o
 *.sio
 xaces3
-sial
 Makefile
 *.mod
 
