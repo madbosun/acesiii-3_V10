@@ -300,6 +300,18 @@ IGNORE_DROPMO=YES
 lccd_g2_rhf.sio
 IGNORE_DROPMO=YES
 
+expand_lccd_uhf.sio
+IGNORE_DROPMO=NO
+
+lccd_gtran_uhf.sio
+IGNORE_DROPMO=YES
+
+lccd_g1_uhf.sio
+IGNORE_DROPMO=YES
+
+lccd_g2_uhf.sio
+IGNORE_DROPMO=YES
+
 rccsdpt_aaa.sio
 VVVI_STACK=YES
 
