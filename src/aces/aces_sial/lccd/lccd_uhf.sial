@@ -2588,7 +2588,9 @@
             endif
          ENDDO kptr1
 
-         execute print_rel_info five pinf
+         etemp = 32
+         execute print_rel_info etemp pinf
+
       endif
 
 # 
@@ -4805,49 +4807,8 @@
       totenerg  = ecorrT  
       totenerg += scfeneg  
       execute print_scalar totenerg  
-      execute print_rel_info seven pinf
-#
-# Write amplitudes to file
-# ------------------------
-
-      etemp = 23.0
+      etemp = 33
       execute print_rel_info etemp pinf
-      DO a
-      DO a1
-      DO i
-      DO i1
-         REQUEST T2old_aa(a,i,a1,i1) a
-         execute maxamp_print T2old_aa
-      ENDDO i1
-      ENDDO i
-      ENDDO a1
-      ENDDO a
-
-      etemp = 24.0
-      execute print_rel_info etemp pinf
-      DO b
-      DO b1
-      DO j
-      DO j1
-         REQUEST T2old_bb(b,j,b1,j1) b
-         execute maxamp_print T2old_bb
-      ENDDO j1
-      ENDDO j
-      ENDDO b1
-      ENDDO b
-
-      etemp = 25.0
-      execute print_rel_info etemp pinf
-      DO a
-      DO b
-      DO i
-      DO j
-         REQUEST T2old_ab(a,i,b,j) a
-         execute maxamp_print T2old_ab
-      ENDDO j
-      ENDDO i
-      ENDDO b
-      ENDDO a
 
 # Write amplitudes to file
 # ------------------------
