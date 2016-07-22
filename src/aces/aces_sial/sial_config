@@ -402,3 +402,9 @@ IGNORE_DROPMO=YES
 rccsdpt_aab_F12.sio
 IGNORE_DROPMO=YES
 
+mp2grad_rhf.sio
+IGNORE_DROPMO=YES
+
+mp2grad_uhf.sio
+IGNORE_DROPMO=YES
+
