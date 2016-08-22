@@ -4504,27 +4504,27 @@
 # Write amplitudes to file
 # ------------------------
 
-      etemp = 21.0
-      execute print_rel_info etemp pinf
-      DO a
-      DO b
-      DO i
-      DO j
-         REQUEST T2old_ab(a,i,b,j) a
-         execute maxamp_print T2old_ab
-      ENDDO j
-      ENDDO i
-      ENDDO b
-      ENDDO a
+#      etemp = 21.0
+#      execute print_rel_info etemp pinf
+#      DO a
+#      DO b
+#      DO i
+#      DO j
+#         REQUEST T2old_ab(a,i,b,j) a
+#         execute maxamp_print T2old_ab
+#      ENDDO j
+#      ENDDO i
+#      ENDDO b
+#      ENDDO a
 
-      etemp = 22.0
-      execute print_rel_info etemp pinf
-      DO a
-      DO i
-         GET t1a_old(a,i)
-         execute maxamp_print t1a_old
-      ENDDO i
-      ENDDO a
+#      etemp = 22.0
+#      execute print_rel_info etemp pinf
+#      DO a
+#      DO i
+#         GET t1a_old(a,i)
+#         execute maxamp_print t1a_old
+#      ENDDO i
+#      ENDDO a
 #
 #
 # Write amplitudes to file
