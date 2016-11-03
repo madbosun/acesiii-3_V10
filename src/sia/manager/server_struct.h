@@ -156,7 +156,7 @@ c---------------------------------------------------------------------------
      *         server_node_ptr, server_seqno,
      *         server_work_list_head, server_work_list_tail,
      *         server_msg(lserver_msg_entry,mx_server_msg),
-     *         blk_to_list_offset(2,mx_server_msg)
+     *         blk_to_list_offset(3,mx_server_msg)
 
 c---------------------------------------------------------------------------
 c   Server memory block table
