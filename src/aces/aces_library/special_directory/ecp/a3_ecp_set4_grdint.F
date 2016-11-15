@@ -44,8 +44,8 @@ C   cartesian basis calculation (key-word driven)
 C - I must add that the names choosen for those 4 variables are dumb!!
 C   
       nharm = (Iflags(h_IFLAGS_spherical) .EQ. 1)
-      Itol  = Iflags(h_IFLAGS2_intgrl_tol)
-      Thres = Dble(10.0D+00*(-Itol))
+C      Itol  = Iflags(h_IFLAGS2_intgrl_tol)
+C      Thres = Dble(10.0D+00*(-Itol))
  
       if (iecp.ne.0) then
 c-----------------------------------------------------------------------
