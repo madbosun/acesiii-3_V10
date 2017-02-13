@@ -309,8 +309,12 @@ c--------------------------------------------------------------------------
                seg(i) = seg(i) + 1 
                if (seg(i) .gt. e_nseg(i)) then
                   seg(i)= e_bseg(i)
-                  i = i + 1
-                  go to 100
+                  if (i .lt. nindex) then 
+                      i = i + 1
+                     go to 100
+                  else 
+                     exit 
+                  endif 
                endif
             endif
          enddo
@@ -654,9 +658,13 @@ c--------------------------------------------------------------------------
                seg(i) = seg(i) + 1 
                if (seg(i) .gt. e_nseg(i)) then
                   seg(i)= e_bseg(i)
-                  i = i + 1
-                  go to 100
-               endif
+                  if (i .lt. nindex) then 
+                      i = i + 1
+                     go to 100
+                  else 
+                     exit 
+                  endif 
+              endif 
             endif
          enddo
  
