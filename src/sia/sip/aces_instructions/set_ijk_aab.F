@@ -26,7 +26,6 @@ c----------------------------------------------------------------------------
       include 'trace.h'
       include 'parallel_info.h'
       include 'int_gen_parms.h'
-      include 'frag_def.h' 
 
       common /d2int_com/jatom, jx, jcenter
       common /Occ_ijk/NT, Xijk(10000,7) 
@@ -48,8 +47,7 @@ c----------------------------------------------------------------------------
       integer i, nseg, bseg, eseg, start(100), end(100), maxi   
 
       integer Nt, np(10), ns(100,10), Xijk
-      integer e, j, k, ii, jj, is, ie, js, je, istart, jstart    
-      integer i_start, j_start 
+      integer e, j, k, ii, jj, is, ie, js, je   
 
       array = op(c_result_array)
       if (array .lt. 1 .or. array .gt. narray_table) then
@@ -105,26 +103,9 @@ c     write(6,*) '   ', ((start(i),end(i)), i=1,nseg)
      *       np(i) = np(i) + 1 
       enddo 
 
-      istart = 1 
-      if (frag_calc) then 
-         istart = n_aocc(1) + 1 
-      endif 
-
-
-      i_start = 0   
-      j_start = 0   
-      if (frag_calc) then 
-c        i_start = 1  
-c        j_start = 1  
-         do i=1,istart-1
-          i_start = i_start + (eaocc_frag(1,i) - baocc_frag(1,i)) + 1 
-         enddo 
-         j_start = i_start
-      endif
-
 c     write(6,*) ' N(I):', (np(i), i=1,nseg) 
 
-      do i = istart, nseg 
+      do i = 1, nseg 
          e = 0 
          do k = 1, np(i) - 1 
             ns(i,k) = (end(i) - start(i) + 1)/np(i) 
@@ -134,22 +115,22 @@ c     write(6,*) ' N(I):', (np(i), i=1,nseg)
       enddo 
 
       Nt = 0 
-      ie = i_start  
-      do i = istart, nseg 
+      ie = 0 
+      do i = 1, nseg 
       do ii = 1, np(i) 
 
          is = ie + 1 
          ie = is + ns(i,ii) - 1 
 
-          je = j_start  
-          do j = istart, nseg 
+          je = 0 
+          do j = 1, nseg 
           do jj = 1, np(j) 
 
              js = je + 1 
              je = js + ns(j,jj) - 1 
 
           if (i .le. j) then 
-             do k = istart, nseg 
+             do k = 1, nseg 
 
                 Nt = Nt + 1 
                 Xijk(Nt,1) = i 
