@@ -27,6 +27,8 @@
       index kk       = 1, naocc
       index kiter    = 1, 1
       index kptr1    = 1, 2
+      index iii      = 1, 5
+      index jjj      = 1, 5 
 #
       aoindex mu     = 1, norb
       aoindex nu     = 1, norb
@@ -135,6 +137,8 @@
       temp t4pqqs(p,q,q1,ii) 
       temp t4pqq(p,q,q1) 
 #
+      local XTaaaiii(a,a1,a2,k1,iii,jjj)
+      local XRaaaiii(a,a1,a2,k1,iii,jjj)
       local Xaaaiii(a,a1,b,k1,ii,jj) 
       temp taaaiii(a,a1,b,k1,ii,jj) 
       served t1a_old(a,i1) 
@@ -2491,6 +2495,17 @@
      PROC OSEG_TRIP1 
 #    ---------------  
 #
+# ----------------------------------------------------------  
+#
+# Set up the parallelization over the three virtual segments
+# ----------------------------------------------------------
+      PARDO a2, a1, a, k1
+         allocate XTaaaiii(a,a1,a2,k1,*,*)
+         allocate XRaaaiii(a,a1,a2,k1,*,*)
+
+         deallocate XTaaaiii(a,a1,a2,k1,*,*)
+         deallocate XRaaaiii(a,a1,a2,k1,*,*)
+      ENDPARDO a2, a1, a, k1
 # Loop over the occupied combinations 
 # ----------------------------------- 
 #
