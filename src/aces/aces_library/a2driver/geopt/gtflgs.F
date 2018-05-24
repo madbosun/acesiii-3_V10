@@ -1546,6 +1546,9 @@ c
       bMN_A3 = .not.ACES2
 
       if (bMN_A3) then
+c Change made to alloc numerical gradients to be performe for any type
+c calculation. Completely numerical hessians also. VFL 12/8/2017
+      if (ioppar(h_IOPPAR_grad_calc) .eq. 2) No_AGRAD = .TRUE.
 c
 C Write a JOBARC record to tell Marcel that this is a new version.
 C So he can write a wrapper to convert all the changes of flags
